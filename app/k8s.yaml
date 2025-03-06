@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: solar-system-web
+  labels:
+    app: solar-system-web
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: 3000
+      protocol: TCP
+  selector:
+    app: solar-system-web
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: solar-system-web
+  labels:
+    app: solar-system-web
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: solar-system-web
+  template:
+    metadata:
+      labels:
+        app: solar-system-web
+    spec:
+      containers:
+        - name: solar-system-web
+          image: macmoi/solar-system-web:latest
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              cpu: "0.5"
+              memory: "512Mi"
+            requests:
+              cpu: "0.2"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
