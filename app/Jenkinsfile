@@ -6,6 +6,10 @@ pipeline {
         DOCKER_CREDENTIALS = credentials('docker-hub-credentials')
     }
 
+    tools {
+        nodejs 'Node22LTS'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -16,7 +20,13 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 dir('app') {
-                    sh 'npm ci --only=production'
+                    script {
+                        nodejs(nodeJSInstallationName: 'Node22LTS') {
+                            sh 'node --version'
+                            sh 'npm --version'
+                            sh 'npm ci --only=production'
+                        }
+                    }
                 }
             }
         }
